@@ -1,0 +1,94 @@
+﻿<UserControl x:Class="LowPolyMaker.Controls.ColorPaletteControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:LowPolyMaker.Controls"
+             mc:Ignorable="d">
+
+	<Grid Name="ColorGrid"
+		  Background="#333333"
+		  MouseLeftButtonUp="ColorGrid_MouseLeftButtonUp"
+		  MouseMove="ColorGrid_MouseMove">
+
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="8" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="64" />
+			<ColumnDefinition Width="8" />
+		</Grid.ColumnDefinitions>
+
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="4" />
+			<RowDefinition Height="32" />
+			<RowDefinition Height="24" />
+			<RowDefinition Height="8" />
+		</Grid.RowDefinitions>
+
+		<Border Name="Header" 
+				Background="#252525" BorderBrush="#252525" BorderThickness="2"
+                Grid.ColumnSpan="10" Height="30"
+				MouseLeftButtonDown="Header_MouseLeftButtonDown"
+				MouseLeftButtonUp="Header_MouseLeftButtonUp"
+				MouseEnter="Header_MouseEnter"
+				MouseMove="Header_MouseMove"
+				MouseLeave="Header_MouseLeave">
+			<Label VerticalAlignment="Center" 
+						HorizontalAlignment="Left"
+						Margin="4,0,0,0"
+						Name="HeaderLabel"
+						Foreground="#c0c0c0">Color Palette</Label>
+		</Border>
+
+		<Border Name="WindowBorder"
+                Grid.Row="1" Grid.ColumnSpan="10" Grid.RowSpan="4" 
+				BorderBrush="#252525" BorderThickness="4,0,4,4" 
+				MouseLeftButtonDown="WindowBorder_MouseLeftButtonDown"
+				MouseLeftButtonUp="WindowBorder_MouseLeftButtonUp"
+				MouseEnter="WindowBorder_MouseEnter"
+				MouseLeave="WindowBorder_MouseLeave"/>
+
+		<CheckBox Name="LockCheck"
+				  Grid.Row="3" Grid.Column="1"
+				  Foreground="#c0c0c0"
+				  VerticalAlignment="Bottom" 
+				  Checked="LockCheck_Checked"
+				  Background="#252525">Lock</CheckBox>
+
+		<!--<Button Name="SortBtn"
+				  Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2" Width="124"
+				  Foreground="#c0c0c0" Background="#252525"
+				  HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+				  Click="SortBtn_Click">Sort</Button>-->
+
+		<Button Name="ResetBtn"
+				  Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2" Width="124"
+				  Foreground="#c0c0c0" Background="#252525"
+				  HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+				  Click="ResetBtn_Click">Reset</Button>
+
+		<Button Name="ApplyBtn"
+				  Grid.Row="3" Grid.Column="7" Grid.ColumnSpan="2" Width="124"
+				  Foreground="#c0c0c0" Background="#252525"
+				  HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+				  Click="ApplyBtn_Click">Apply</Button>
+
+		<!--<Border Grid.Row="3" Grid.Column="1" Background="Red">
+			<Label Foreground="#c0c0c0" HorizontalAlignment="Center" VerticalAlignment="Center">#FF0000</Label>
+		</Border>
+		<Border Grid.Row="3" Grid.Column="2" Background="Green">
+			<Label Foreground="#c0c0c0" HorizontalAlignment="Center" VerticalAlignment="Center">#00FF00</Label>
+		</Border>
+		<Border Grid.Row="3" Grid.Column="3" Background="Blue">
+			<Label Foreground="#c0c0c0" HorizontalAlignment="Center" VerticalAlignment="Center">#0000FF</Label>
+		</Border>-->
+
+	</Grid>
+</UserControl>
