@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -129,6 +131,7 @@ namespace LowPolyMaker
 	public class Graph
 	{
 		public const string FileExtension = ".lpm";
+		public const string SvgExtension = ".svg";
 
 		public static Graph Current { get; set; } = new Graph();
 
@@ -173,6 +176,35 @@ namespace LowPolyMaker
 				triangle.Shape.Fill = null;
 				triangle.Shape.Fill = new SolidColorBrush(colorPalette.GetTriangleColor(triangle, true));
 			}
+		}
+
+		internal static string SerializeAsSvg(Graph graph)
+		{
+			var strBuilder = new StringBuilder();
+			strBuilder.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+
+			var min = new Point(graph.Points.Min(p => p.Position.X), graph.Points.Min(p => p.Position.Y));
+			var max = new Point(graph.Points.Max(p => p.Position.X), graph.Points.Max(p => p.Position.Y));
+			strBuilder.AppendLine($"<svg width=\"{ max.X - min.X }\" height=\"{ max.Y - min.Y }\" xmlns=\"http://www.w3.org/2000/svg\">");
+
+			foreach (var t in graph.Triangles)
+			{
+				var p1 = t.Point1.Position - min;
+				var p2 = t.Point2.Position - min;
+				var p3 = t.Point3.Position - min;
+
+				var fillColor = t.Shape.Fill as SolidColorBrush;
+				var fill = $"#{ fillColor.Color.R:x2}{ fillColor.Color.G:x2}{ fillColor.Color.B:x2}";
+				
+				var stroke = "#000000";
+				var strokeOpacity = 0;
+
+				strBuilder.AppendLine($"<polygon fill=\"{ fill }\" stroke-opacity=\"{ strokeOpacity }\" stroke=\"{ stroke }\" points=\"{ (int)p1.X },{ (int)p1.Y } { (int)p2.X },{ (int)p2.Y } { (int)p3.X },{ (int)p3.Y }\" class=\"triangle\" />");
+			}
+
+			strBuilder.AppendLine("</svg>");
+
+			return strBuilder.ToString();
 		}
 	}
 }

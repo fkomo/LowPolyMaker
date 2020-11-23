@@ -245,7 +245,7 @@ namespace LowPolyMaker
 		{
 			if (e.Key == Key.Escape)
 			{
-				if (ColorPaletteWindow.Visibility == Visibility.Visible)
+				if (ColorPaletteWindow?.Visibility == Visibility.Visible)
 				{
 					TogglePaletteWindow();
 					return;
@@ -1248,6 +1248,46 @@ namespace LowPolyMaker
 			// TODO export image as black edge graph on white background
 
 			// each triangle must be numbered
+
+			Export();
+		}
+
+		private void Export()
+		{
+			if (Graph.Current.Filename != null)
+				ExportGraph(Graph.Current.Filename);
+
+			else
+				ExportAs();
+		}
+
+		private void ExportAs()
+		{
+			var fileDialog = new SaveFileDialog()
+			{
+				Filter = $"Scalable vector graphics files (*{ Graph.SvgExtension })|*{ Graph.SvgExtension }",
+			};
+			{
+				if (fileDialog.ShowDialog() == true)
+					ExportGraph(fileDialog.FileName);
+			}
+		}
+
+		private void ExportGraph(string graphFilename)
+		{
+			try
+			{
+				var fileInfo = new FileInfo(graphFilename);
+				var exportFilename = graphFilename.Replace(fileInfo.Extension, Graph.SvgExtension);
+
+				File.WriteAllText(exportFilename, Graph.SerializeAsSvg(Graph.Current));
+
+				SetStatus($"{ DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") } exported");
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+			}
 		}
 
 		private void NewBtn_Click(object sender, RoutedEventArgs e)
