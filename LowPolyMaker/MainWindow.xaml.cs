@@ -265,6 +265,10 @@ namespace LowPolyMaker
 			{
 				HideBackground();
 			}
+			else if (e.Key == Key.E)
+			{
+				HideGraph();
+			}
 			else if (e.Key == Key.F1)
 			{
 				TogglePaletteWindow();
@@ -277,6 +281,10 @@ namespace LowPolyMaker
 			{
 				ShowBackground();
 			}
+			else if (e.Key == Key.E)
+			{
+				ShowGraph();
+			}
 		}
 
 		private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -288,6 +296,28 @@ namespace LowPolyMaker
 		}
 
 		#endregion
+
+		private void HideGraph()
+		{
+			// hide points
+			foreach (var point in Graph.Current.Points)
+				point.Shape.Visibility = Visibility.Collapsed;
+
+			// hide triangles
+			foreach (var triangle in Graph.Current.Triangles)
+				triangle.Shape.Visibility = Visibility.Collapsed;
+		}
+
+		private void ShowGraph()
+		{
+			// show points
+			foreach (var point in Graph.Current.Points)
+				point.Shape.Visibility = Visibility.Visible;
+			
+			// show triangles
+			foreach (var triangle in Graph.Current.Triangles)
+				triangle.Shape.Visibility = Visibility.Visible;
+		}
 
 		private void HideBackground()
 		{
@@ -1016,6 +1046,7 @@ namespace LowPolyMaker
 				var dialog = new OpenFileDialog()
 				{
 					Filter = $"{ ApplicationName } files (*{ Graph.FileExtension })|*{ Graph.FileExtension }|"
+							+ $"Scalable vector graphics files (*{ Graph.SvgExtension })|*{ Graph.SvgExtension }|"
 							+ "Image files (*.jpg,*.jpeg,*.jpe,*.jfif,*.png,*.bmp)|*.jpg;*.jpeg;*.jpe;*.jfif;*.png;*.bmp",
 					Multiselect = false,
 					CheckFileExists = true
@@ -1026,6 +1057,8 @@ namespace LowPolyMaker
 				{
 					if (filename.EndsWith(Graph.FileExtension))
 						LoadGraph(filename);
+					else if (filename.EndsWith(Graph.SvgExtension))
+						ImportGraph(filename);
 					else
 					{
 						LoadImage(filename);
@@ -1123,6 +1156,23 @@ namespace LowPolyMaker
 			}
 		}
 
+		private void ImportGraph(string graphFilename)
+		{
+			try
+			{
+				Reset();
+
+				Graph.Current = Graph.DeserializeSvg(File.ReadAllText(graphFilename));
+				Graph.Current.Filename = graphFilename.Replace(Graph.SvgExtension, Graph.FileExtension);
+
+				ProcessCurrentGraph();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString());
+			}
+		}
+
 		private void LoadGraph(string graphFilename)
 		{
 			try
@@ -1131,61 +1181,71 @@ namespace LowPolyMaker
 
 				Graph.Current = Graph.Deserialize(File.ReadAllText(graphFilename));
 
-				LoadImage(Graph.Current.ImageFilename);
-				Graph.Current.Filename = graphFilename;
-
-				foreach (var point in Graph.Current.Points)
+				if (!string.IsNullOrEmpty(Graph.Current.ImageFilename))
 				{
-					point.Shape = CreatePointShape();
-
-					Canvas.SetLeft(point.Shape, point.Position.X - point.Shape.Width / 2);
-					Canvas.SetTop(point.Shape, point.Position.Y - point.Shape.Height / 2);
-
-					MainCanvas.Children.Add(point.Shape);
+					LoadImage(Graph.Current.ImageFilename);
+					Graph.Current.Filename = graphFilename;
 				}
 
-				foreach (var edge in Graph.Current.Edges)
-				{
-					edge.Start = Graph.Current.Points.Single(p => p.Id == edge.StartPointId);
-					edge.End = Graph.Current.Points.Single(p => p.Id == edge.EndPointId);
-					edge.Shape = CreateEdgeShape(edge.Start.Position, edge.End.Position);
-				}
-
-				foreach (var triangle in Graph.Current.Triangles)
-				{
-					triangle.Point1 = Graph.Current.Points.Single(p => p.Id == triangle.Point1Id);
-					triangle.Point2 = Graph.Current.Points.Single(p => p.Id == triangle.Point2Id);
-					triangle.Point3 = Graph.Current.Points.Single(p => p.Id == triangle.Point3Id);
-					triangle.Shape = new Polygon
-					{
-						Points = new PointCollection()
-					{
-						triangle.Point1.Position,
-						triangle.Point2.Position,
-						triangle.Point3.Position
-					},
-					};
-
-					MainCanvas.Children.Add(triangle.Shape);
-				}
-
-				// TODO load color palette
-
-				// set triangle colors based on current palette
-				foreach (var triangle in Graph.Current.Triangles)
-				{
-					var triangleColor = ColorPalette.Current.GetTriangleColor(triangle);
-					triangle.Shape.Fill = new SolidColorBrush(triangleColor);
-				}
-
-				UpdateGraphInfoText();
-
-				Title = $"{ ApplicationName } [{ Graph.Current.Filename }]";
+				ProcessCurrentGraph();
 			}
 			catch (Exception ex)
 			{
 				MessageBox.Show(ex.ToString());
 			}
+		}
+
+		private void ProcessCurrentGraph()
+		{
+
+
+			foreach (var point in Graph.Current.Points)
+			{
+				point.Shape = CreatePointShape();
+
+				Canvas.SetLeft(point.Shape, point.Position.X - point.Shape.Width / 2);
+				Canvas.SetTop(point.Shape, point.Position.Y - point.Shape.Height / 2);
+
+				MainCanvas.Children.Add(point.Shape);
+			}
+
+			foreach (var edge in Graph.Current.Edges)
+			{
+				edge.Start = Graph.Current.Points.Single(p => p.Id == edge.StartPointId);
+				edge.End = Graph.Current.Points.Single(p => p.Id == edge.EndPointId);
+				edge.Shape = CreateEdgeShape(edge.Start.Position, edge.End.Position);
+			}
+
+			foreach (var triangle in Graph.Current.Triangles)
+			{
+				triangle.Point1 = Graph.Current.Points.Single(p => p.Id == triangle.Point1Id);
+				triangle.Point2 = Graph.Current.Points.Single(p => p.Id == triangle.Point2Id);
+				triangle.Point3 = Graph.Current.Points.Single(p => p.Id == triangle.Point3Id);
+				triangle.Shape = new Polygon
+				{
+					Points = new PointCollection()
+						{
+							triangle.Point1.Position,
+							triangle.Point2.Position,
+							triangle.Point3.Position
+						},
+				};
+
+				MainCanvas.Children.Add(triangle.Shape);
+			}
+
+			// TODO load color palette
+
+			// set triangle colors based on current palette
+			foreach (var triangle in Graph.Current.Triangles)
+			{
+				var triangleColor = ColorPalette.Current.GetTriangleColor(triangle);
+				triangle.Shape.Fill = new SolidColorBrush(triangleColor);
+			}
+
+			UpdateGraphInfoText();
+
+			Title = $"{ ApplicationName } [{ Graph.Current.Filename }]";
 		}
 
 		#endregion
@@ -1278,9 +1338,12 @@ namespace LowPolyMaker
 			try
 			{
 				var fileInfo = new FileInfo(graphFilename);
-				var exportFilename = graphFilename.Replace(fileInfo.Extension, Graph.SvgExtension);
 
-				File.WriteAllText(exportFilename, Graph.SerializeAsSvg(Graph.Current));
+				var exportFilename = graphFilename.Replace(fileInfo.Extension, Graph.SvgExtension);
+				File.WriteAllText(exportFilename, Graph.SerializeAsSvg(Graph.Current, "stroke-opacity=\"0.0\" stroke=\"#000\""));
+
+				exportFilename = exportFilename.Replace(Graph.SvgExtension, $".stroke.{ Graph.SvgExtension }");
+				File.WriteAllText(exportFilename, Graph.SerializeAsSvg(Graph.Current, "stroke-opacity=\"0.01\" stroke=\"#000\""));
 
 				SetStatus($"{ DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") } exported");
 			}

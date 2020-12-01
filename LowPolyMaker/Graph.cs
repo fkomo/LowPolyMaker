@@ -169,6 +169,11 @@ namespace LowPolyMaker
 					return serializer.ReadObject(stm) as Graph;
 		}
 
+		internal static Graph DeserializeSvg(string serialized)
+		{
+			throw new NotImplementedException();
+		}
+
 		public void ApplyColorPalette(ColorPalette colorPalette)
 		{
 			foreach (var triangle in Triangles)
@@ -178,7 +183,7 @@ namespace LowPolyMaker
 			}
 		}
 
-		internal static string SerializeAsSvg(Graph graph)
+		internal static string SerializeAsSvg(Graph graph, string attributes = null)
 		{
 			var strBuilder = new StringBuilder();
 			strBuilder.AppendLine("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
@@ -195,11 +200,8 @@ namespace LowPolyMaker
 
 				var fillColor = t.Shape.Fill as SolidColorBrush;
 				var fill = $"#{ fillColor.Color.R:x2}{ fillColor.Color.G:x2}{ fillColor.Color.B:x2}";
-				
-				var stroke = "#000000";
-				var strokeOpacity = 0;
 
-				strBuilder.AppendLine($"<polygon fill=\"{ fill }\" stroke-opacity=\"{ strokeOpacity }\" stroke=\"{ stroke }\" points=\"{ (int)p1.X },{ (int)p1.Y } { (int)p2.X },{ (int)p2.Y } { (int)p3.X },{ (int)p3.Y }\" class=\"triangle\" />");
+				strBuilder.AppendLine($"<polygon fill=\"{ fill }\" { attributes } points=\"{ (int)p1.X },{ (int)p1.Y } { (int)p2.X },{ (int)p2.Y } { (int)p3.X },{ (int)p3.Y }\" class=\"triangle\" />");
 			}
 
 			strBuilder.AppendLine("</svg>");
